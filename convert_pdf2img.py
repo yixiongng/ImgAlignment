@@ -8,5 +8,7 @@ ap.add_argument("--pdf", required=True,
 args = vars(ap.parse_args())
 
 pages=convert_from_path(args["pdf"])
-for page in pages:
-	page.save(os.path.splitext(args["pdf"])[0] + '.jpg', 'JPEG')
+base=os.path.basename(args["pdf"])
+imgname = os.path.splitext(base)[0]
+for index, page in enumerate(pages):
+	page.save(imgname + '_' + str(index) + '.jpg', 'JPEG')
