@@ -1,7 +1,8 @@
 from pdf2image import *
 import argparse
 import os
-
+import timeit
+start = timeit.default_timer()
 ap = argparse.ArgumentParser()
 ap.add_argument("--pdf", required=True,
 	help="path to input image that we'll align to template")
@@ -12,3 +13,7 @@ base=os.path.basename(args["pdf"])
 imgname = os.path.splitext(base)[0]
 for index, page in enumerate(pages):
 	page.save(imgname + '_' + str(index) + '.jpg', 'JPEG')
+
+stop = timeit.default_timer()
+
+print('Time: ', stop - start)  
