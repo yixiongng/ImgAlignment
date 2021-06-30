@@ -4,6 +4,8 @@ import numpy as np
 import argparse
 import imutils
 import cv2
+import timeit
+start = timeit.default_timer()
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -20,7 +22,14 @@ template = cv2.imread(args["template"])
 
 # align the images
 print("[INFO] aligning image...")
-match1 = bf_SIFT(image, template)
+# match1 = bf_SIFT(image, template)
+# match1 = ORB_BF(image, template)
+# match1 = SIFT_FLAAN(image, template)
+# match1 = SIFT_BF(image, template)
+# match1 = AKAZE_BF(image, template)
+# match1 = BRISK_BF(image, template)
+# match1 = bf_matcher(image, template)
+match1 = ORB_FLANN(image, template)
 
 # resize both the aligned and template images so we can easily
 # visualize them on our screen
@@ -43,4 +52,7 @@ print("[INFO] image aligned")
 # show the two output image alignment visualizations
 cv2.imshow("Image Alignment Stacked", stacked)
 cv2.imshow("Image Alignment Overlay", output)
+stop = timeit.default_timer()
+
+print('Time: ', stop - start) 
 cv2.waitKey(0)
