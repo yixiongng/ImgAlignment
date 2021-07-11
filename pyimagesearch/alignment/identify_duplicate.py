@@ -4,38 +4,32 @@ import cv2
 import numpy as np
 import glob
 import pandas as pd
+import timeit
 
-
+start = timeit.default_timer()
 listOfTitles1 = []
 listOfTitles2 = []
 listOfSimilarities = []
 
-    # Sift and Flann
-sift = cv2.xfeatures2d.SIFT_create()
-
-
-index_params = dict(algorithm=0, trees=5)
-search_params = dict()
-flann = cv2.FlannBasedMatcher(index_params, search_params)
+# orb and brute force 
+orb = cv2.ORB_create(nfeatures=500)
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
 # Load all the images1
-
 countInner = 0
 countOuter = 1
 
-folder = r"/Downloads/images/**/*"
-folder = "SiftImages/*"
-
+folder = "./scans/picture/*"
 
 siftOut = {}
 for a in glob.iglob(folder,recursive=True):
     if not a.lower().endswith(('.jpg','.png','.tif','.tiff','.gif')):
         continue
+
     image1 = cv2.imread(a)
-    kp_1, desc_1 = sift.detectAndCompute(image1, None)
+
+    kp_1, desc_1 = orb.detectAndCompute(image1, None)
     siftOut[a]=(kp_1,desc_1)
-
-
 
 for a in glob.iglob(folder,recursive=True):
     if not a.lower().endswith(('.jpg','.png','.tif','.tiff','.gif')):
@@ -44,42 +38,21 @@ for a in glob.iglob(folder,recursive=True):
     (kp_1,desc_1) = siftOut[a]
 
     for b in glob.iglob(folder,recursive=True):
-
-
         if not b.lower().endswith(('.jpg','.png','.tif','.tiff','.gif')):
-
             continue
 
         if b.lower().endswith(('.jpg','.png','.tif','.tiff','.gif')):
-
             countInner += 1
-
 
         print(countInner, "", countOuter)
 
         if countInner <= countOuter:
-
             continue
-
-        #### image1 = cv2.imread(a)
-        #### kp_1, desc_1 = sift.detectAndCompute(image1, None)
-        ####
-        #### image2 = cv2.imread(b)
-        #### kp_2, desc_2 = sift.detectAndCompute(image2, None)
 
         (kp_2,desc_2) = siftOut[b]
-
-        matches = flann.knnMatch(desc_1, desc_2, k=2)
-
-        good_points = []
-
-        if good_points == 0:
-
-            continue
-
-        for m, n in matches:
-            if m.distance < 0.6*n.distance:
-                good_points.append(m)
+        matches = bf.match(desc_1, desc_2)
+        
+        good_points = sorted(matches, key=lambda x: x.distance)
 
         number_keypoints = 0
         if len(kp_1) >= len(kp_2):
@@ -91,7 +64,6 @@ for a in glob.iglob(folder,recursive=True):
 
         listOfSimilarities.append(str(int(percentage_similarity)))
         listOfTitles2.append(b)
-
         listOfTitles1.append(a)
 
     countInner = 0
@@ -104,5 +76,7 @@ print(zippedList)
 
 dfObj = pd.DataFrame(zippedList, columns = ['Original', 'Title' , 'Similarity'])
 
-### dfObj.to_csv(r"/Downloads/images/DuplicateImages3.csv")
 dfObj.to_csv(r"DuplicateImages3.2.csv")
+stop = timeit.default_timer()
+
+print('Time: ', stop - start) 
