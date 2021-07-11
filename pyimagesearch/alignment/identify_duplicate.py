@@ -13,7 +13,7 @@ listOfSimilarities = []
 
 # orb and brute force 
 orb = cv2.ORB_create(nfeatures=500)
-bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+bf = cv2.BFMatcher()
 
 # Load all the images1
 countInner = 0
@@ -50,17 +50,24 @@ for a in glob.iglob(folder,recursive=True):
             continue
 
         (kp_2,desc_2) = siftOut[b]
-        matches = bf.match(desc_1, desc_2)
-        
-        good_points = sorted(matches, key=lambda x: x.distance)
+        matches = bf.knnMatch(desc_1, desc_2, k=2)
+        goods = []
 
+        for  i,pair in enumerate(matches):
+            try:
+                m, n = pair
+                if m.distance < 0.6 *n.distance:
+                    goods.append(m)
+            except ValueError:
+                pass
+        
         number_keypoints = 0
         if len(kp_1) >= len(kp_2):
             number_keypoints = len(kp_1)
         else:
             number_keypoints = len(kp_2)
 
-        percentage_similarity = float(len(good_points)) / number_keypoints * 100
+        percentage_similarity = float(len(goods)) / number_keypoints * 100
 
         listOfSimilarities.append(str(int(percentage_similarity)))
         listOfTitles2.append(b)
