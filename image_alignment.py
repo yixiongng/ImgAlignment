@@ -1,5 +1,5 @@
 # import the necessary packages
-from pyimagesearch.alignment.align_images import *
+from align_images import *
 import numpy as np
 import argparse
 import imutils
